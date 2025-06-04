@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conveniência - Sistema de Pedidos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #FFD700;
+            --secondary-color: #FFC107;
+            --dark-color: #212529;
+            --light-color: #f8f9fa;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-color);
+            padding-bottom: 70px;
+        }
+        
+        .navbar {
+            background-color: var(--primary-color);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            color: var(--dark-color);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: var(--dark-color);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+            color: var(--dark-color);
+        }
+        
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+            margin-bottom: 20px;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-img-top {
+            height: 180px;
+            object-fit: cover;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+        
+        .welcome-banner {
+            background-color: var(--primary-color);
+            color: var(--dark-color);
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .category-btn {
+            margin: 5px;
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            border: 1px solid var(--secondary-color);
+        }
+        
+        .category-btn.active {
+            background-color: var(--primary-color);
+            color: var(--dark-color);
+        }
+        
+        .cart-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--primary-color);
+            padding: 10px 20px;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .cart-total {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .quantity-control button {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: var(--dark-color);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .quantity-control span {
+            margin: 0 10px;
+            font-weight: bold;
+        }
+        
+        #loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            color: var(--primary-color);
+        }
+        
+        @media (max-width: 768px) {
+            .card-img-top {
+                height: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="loading" style="display: none;">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Carregando...</span>
+        </div>
+    </div>
+
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container">
+            <a class="navbar-brand" href="#">Conveniência</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" id="homeLink">Início</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="cartLink">Carrinho</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Página Inicial -->
+        <div id="homePage">
+            <div class="welcome-banner">
+                <h1>Bem-vindo à nossa Conveniência</h1>
+                <p class="lead">Selecione suas bebidas favoritas e faça seu pedido</p>
+                <button class="btn btn-dark btn-lg" id="startOrderBtn">Iniciar Pedido</button>
+            </div>
+        </div>
+
+        <!-- Página de Catálogo -->
+        <div id="catalogPage" style="display: none;">
+            <h2 class="mb-4">Nossas Bebidas</h2>
+            
+            <div class="mb-4">
+                <input type="text" class="form-control" id="searchInput" placeholder="Buscar bebidas...">
+            </div>
+            
+            <div class="mb-4" id="categoriesContainer">
+                <button class="btn category-btn active" data-category="todas">Todas</button>
+                <!-- Categorias serão adicionadas dinamicamente -->
+            </div>
+            
+            <div class="row" id="productsContainer">
+                <!-- Produtos serão adicionados dinamicamente -->
+            </div>
+        </div>
+
+        <!-- Página de Detalhes do Produto -->
+        <div id="productDetailPage" style="display: none;">
+            <div class="row">
+                <div class="col-md-6">
+                    <img id="detailImage" src="" alt="Produto" class="img-fluid rounded">
+                </div>
+                <div class="col-md-6">
+                    <h2 id="detailName"></h2>
+                    <p id="detailDescription" class="text-muted"></p>
+                    <h3 id="detailPrice" class="mb-3"></h3>
+                    
+                    <div class="quantity-control mb-4">
+                        <button id="decreaseQuantity">-</button>
+                        <span id="quantityValue">1</span>
+                        <button id="increaseQuantity">+</button>
+                    </div>
+                    
+                    <button class="btn btn-primary btn-lg" id="addToCartBtn">Adicionar ao Carrinho</button>
+                    <button class="btn btn-outline-secondary btn-lg ms-2" id="backToCatalogBtn">Voltar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Página do Carrinho -->
+        <div id="cartPage" style="display: none;">
+            <h2 class="mb-4">Seu Carrinho</h2>
+            
+            <div id="emptyCartMessage" style="display: none;">
+                <div class="alert alert-info">
+                    Seu carrinho está vazio. Adicione alguns produtos!
+                </div>
+                <button class="btn btn-primary" id="continueShopping">Continuar Comprando</button>
+            </div>
+            
+            <div id="cartItems">
+                <!-- Itens do carrinho serão adicionados dinamicamente -->
+            </div>
+            
+            <div class="d-flex justify-content-between align-items-center mt-4" id="cartActions" style="display: none;">
+                <button class="btn btn-outline-secondary" id="clearCartBtn">Limpar Carrinho</button>
+                <button class="btn btn-primary btn-lg" id="checkoutBtn">Finalizar Pedido</button>
+            </div>
+        </div>
+
+        <!-- Página de Confirmação -->
+        <div id="confirmationPage" style="display: none;">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h2 class="card-title mb-4">Pedido Confirmado!</h2>
+                    <div class="alert alert-success mb-4">
+                        <h4>Número do Pedido: <span id="orderNumber"></span></h4>
+                    </div>
+                    <p class="lead">Seu pedido foi registrado com sucesso.</p>
+                    <p>Por favor, dirija-se ao caixa para efetuar o pagamento.</p>
+                    
+                    <div class="mt-4">
+                        <h5>Resumo do Pedido:</h5>
+                        <div id="orderSummary" class="text-start">
+                            <!-- Resumo do pedido será adicionado dinamicamente -->
+                        </div>
+                        <h4 class="mt-3">Total: <span id="orderTotal"></span></h4>
+                    </div>
+                    
+                    <button class="btn btn-primary btn-lg mt-4" id="newOrderBtn">Fazer Novo Pedido</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="cart-footer" id="cartFooter" style="display: none;">
+        <div class="cart-total">
+            Total: <span id="totalValue">R$ 0,00</span>
+        </div>
+        <button class="btn btn-dark" id="viewCartBtn">
+            Ver Carrinho <span id="cartCount" class="badge bg-light text-dark">0</span>
+        </button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Estado da aplicação
+        const state = {
+            products: [],
+            categories: [],
+            cart: [],
+            currentProduct: null,
+            currentQuantity: 1
+        };
+
+        // Elementos DOM
+        const elements = {
+            pages: {
+                home: document.getElementById('homePage'),
+                catalog: document.getElementById('catalogPage'),
+                productDetail: document.getElementById('productDetailPage'),
+                cart: document.getElementById('cartPage'),
+                confirmation: document.getElementById('confirmationPage')
+            },
+            navbar: {
+                home: document.getElementById('homeLink'),
+                cart: document.getElementById('cartLink')
+            },
+            catalog: {
+                categoriesContainer: document.getElementById('categoriesContainer'),
+                productsContainer: document.getElementById('productsContainer'),
+                searchInput: document.getElementById('searchInput')
+            },
+            productDetail: {
+                image: document.getElementById('detailImage'),
+                name: document.getElementById('detailName'),
+                description: document.getElementById('detailDescription'),
+                price: document.getElementById('detailPrice'),
+                quantity: document.getElementById('quantityValue'),
+                decreaseBtn: document.getElementById('decreaseQuantity'),
+                increaseBtn: document.getElementById('increaseQuantity'),
+                addToCartBtn: document.getElementById('addToCartBtn'),
+                backBtn: document.getElementById('backToCatalogBtn')
+            },
+            cart: {
+                items: document.getElementById('cartItems'),
+                emptyMessage: document.getElementById('emptyCartMessage'),
+                actions: document.getElementById('cartActions'),
+                clearBtn: document.getElementById('clearCartBtn'),
+                checkoutBtn: document.getElementById('checkoutBtn'),
+                continueBtn: document.getElementById('continueShopping')
+            },
+            confirmation: {
+                orderNumber: document.getElementById('orderNumber'),
+                orderSummary: document.getElementById('orderSummary'),
+                orderTotal: document.getElementById('orderTotal'),
+                newOrderBtn: document.getElementById('newOrderBtn')
+            },
+            footer: {
+                container: document.getElementById('cartFooter'),
+                total: document.getElementById('totalValue'),
+                count: document.getElementById('cartCount'),
+                viewCartBtn: document.getElementById('viewCartBtn')
+            },
+            loading: document.getElementById('loading'),
+            startOrderBtn: document.getElementById('startOrderBtn')
+        };
+
+        // Funções auxiliares
+        function formatCurrency(value) {
+            return `R$ ${value.toFixed(2)}`;
+        }
+
+        function showLoading() {
+            elements.loading.style.display = 'flex';
+        }
+
+        function hideLoading() {
+            elements.loading.style.display = 'none';
+        }
+
+        function showPage(pageId) {
+            // Esconde todas as páginas
+            Object.values(elements.pages).forEach(page => {
+                page.style.display = 'none';
+            });
+            
+            // Mostra a página solicitada
+            elements.pages[pageId].style.display = 'block';
+            
+            // Atualiza a navegação
+            Object.values(elements.navbar).forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            if (pageId === 'home') {
+                elements.navbar.home.classList.add('active');
+                elements.footer.container.style.display = 'none';
+            } else if (pageId === 'cart') {
+                elements.navbar.cart.classList.add('active');
+                elements.footer.container.style.display = 'none';
+            } else {
+                elements.footer.container.style.display = 'flex';
+            }
+        }
+
+        function updateCartUI() {
+            const totalItems = state.cart.reduce((total, item) => total + item.quantity, 0);
+            const totalValue = state.cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+            
+            elements.footer.count.textContent = totalItems;
+            elements.footer.total.textContent = formatCurrency(totalValue);
+            
+            // Atualiza a página do carrinho
+            if (totalItems === 0) {
+                elements.cart.emptyMessage.style.display = 'block';
+                elements.cart.items.innerHTML = '';
+                elements.cart.actions.style.display = 'none';
+            } else {
+                elements.cart.emptyMessage.style.display = 'none';
+                elements.cart.actions.style.display = 'flex';
+                
+                // Renderiza os itens do carrinho
+                elements.cart.items.innerHTML = '';
+                state.cart.forEach(item => {
+                    const itemElement = document.createElement('div');
+                    itemElement.className = 'card mb-3';
+                    itemElement.innerHTML = `
+                        <div class="row g-0">
+                            <div class="col-md-2">
+                                <img src="${item.image}" class="img-fluid rounded-start" alt="${item.name}">
+                            </div>
+                            <div class="col-md-10">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <h5 class="card-title">${item.name}</h5>
+                                        <button class="btn btn-sm btn-outline-danger remove-item" data-id="${item.id}">
+                                            <i class="bi bi-trash"></i> Remover
+                                        </button>
+                                    </div>
+                                    <p class="card-text">${formatCurrency(item.price)} x ${item.quantity} = ${formatCurrency(item.price * item.quantity)}</p>
+                                    <div class="quantity-control">
+                                        <button class="decrease-item" data-id="${item.id}">-</button>
+                                        <span>${item.quantity}</span>
+                                        <button class="increase-item" data-id="${item.id}">+</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    elements.cart.items.appendChild(itemElement);
+                    
+                    // Adiciona event listeners
+                    itemElement.querySelector('.remove-item').addEventListener('click', () => {
+                        removeFromCart(item.id);
+                    });
+                    
+                    itemElement.querySelector('.decrease-item').addEventListener('click', () => {
+                        updateCartItemQuantity(item.id, item.quantity - 1);
+                    });
+                    
+                    itemElement.querySelector('.increase-item').addEventListener('click', () => {
+                        updateCartItemQuantity(item.id, item.quantity + 1);
+                    });
+                });
+            }
+        }
+
+        function addToCart(product, quantity) {
+            // Verifica se o produto já está no carrinho
+            const existingItem = state.cart.find(item => item.id === product.id);
+            
+            if (existingItem) {
+                existingItem.quantity += quantity;
+            } else {
+                state.cart.push({
+                    id: product.id,
+                    name: product.nome,
+                    price: product.preco,
+                    image: product.imagem_url,
+                    quantity: quantity
+                });
+            }
+            
+            updateCartUI();
+        }
+
+        function removeFromCart(productId) {
+            state.cart = state.cart.filter(item => item.id !== productId);
+            updateCartUI();
+        }
+
+        function updateCartItemQuantity(productId, newQuantity) {
+            if (newQuantity <= 0) {
+                removeFromCart(productId);
+                return;
+            }
+            
+            const item = state.cart.find(item => item.id === productId);
+            if (item) {
+                item.quantity = newQuantity;
+                updateCartUI();
+            }
+        }
+
+        function clearCart() {
+            state.cart = [];
+            updateCartUI();
+        }
+
+        function loadProducts() {
+            showLoading();
+            
+            // Simulando uma chamada API
+            setTimeout(() => {
+                // Dados de exemplo (em produção, isso viria da API)
+                state.products = [
+                    {
+                        id: 1,
+                        nome: 'Água Mineral 500ml',
+                        descricao: 'Água mineral sem gás',
+                        preco: 2.50,
+                        categoria: 'Água',
+                        imagem_url: 'https://via.placeholder.com/300x200?text=Água+Mineral'
+                    },
+                    {
+                        id: 2,
+                        nome: 'Refrigerante Cola 350ml',
+                        descricao: 'Refrigerante sabor cola',
+                        preco: 4.50,
+                        categoria: 'Refrigerante',
+                        imagem_url: 'https://via.placeholder.com/300x200?text=Refrigerante+Cola'
+                    },
+                    {
+                        id: 3,
+                        nome: 'Refrigerante Guaraná 350ml',
+                        descricao: 'Refrigerante sabor guaraná',
+                        preco: 4.00,
+                        categoria: 'Refrigerante',
+                        imagem_url: 'https://via.placeholder.com/300x200?text=Refrigerante+Guaraná'
+                    },
+                    {
+                        id: 4,
+                        nome: 'Suco de Laranja 300ml',
+                        descricao: 'Suco natural de laranja',
+                        preco: 6.00,
+                        categoria: 'Suco',
+                        imagem_url: 'https://via.placeholder.com/300x200?text=Suco+de+Laranja'
+                    },
+                    {
+                        id: 5,
+                        nome: 'Cerveja Pilsen 350ml',
+                        descricao: 'Cerveja tipo pilsen',
+                        preco: 5.50,
+                        categoria: 'Alcoólica',
+                        imagem_url: 'https://via.placeholder.com/300x200?text=Cerveja+Pilsen'
+                    },
+                    {
+                        id: 6,
+                        nome: 'Energético 250ml',
+                        descricao: 'Bebida energética',
+                        preco: 8.00,
+                        categoria: 'Energético',
+                        imagem_url: 'https://via.placeholder.com/300x200?text=Energético'
+                    },
+                    {
+                        id: 7,
+                        nome: 'Água de Coco 300ml',
+                        descricao: 'Água de coco natural',
+                        preco: 7.00,
+                        categoria: 'Água',
+                        imagem_url: 'https://via.placeholder.com/300x200?text=Água+de+Coco'
+                    },
+                    {
+                        id: 8,
+                        nome: 'Chá Gelado 350ml',
+                        descricao: 'Chá gelado sabor limão',
+                        preco: 5.00,
+                        categoria: 'Chá',
+                        imagem_url: 'https://via.placeholder.com/300x200?text=Chá+Gelado'
+                    }
+                ];
+                
+                // Extrai categorias únicas
+                const categoriesSet = new Set(state.products.map(product => product.categoria));
+                state.categories = Array.from(categoriesSet);
+                
+                // Renderiza categorias
+                state.categories.forEach(category => {
+                    const button = document.createElement('button');
+                    button.className = 'btn category-btn';
+                    button.textContent = category;
+                    button.dataset.category = category;
+                    button.addEventListener('click', () => filterByCategory(category));
+                    elements.catalog.categoriesContainer.appendChild(button);
+                });
+                
+                // Renderiza produtos
+                renderProducts(state.products);
+                
+                hideLoading();
+            }, 1000);
+        }
+
+        function renderProducts(products) {
+            elements.catalog.productsContainer.innerHTML = '';
+            
+            products.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'col-md-3 col-sm-6';
+                productCard.innerHTML = `
+                    <div class="card">
+                        <img src="${product.imagem_url}" class="card-img-top" alt="${product.nome}">
+                        <div class="card-body">
+                            <h5 class="card-title">${product.nome}</h5>
+                            <p class="card-text">${formatCurrency(product.preco)}</p>
+                            <button class="btn btn-primary view-product" data-id="${product.id}">Ver Detalhes</button>
+                        </div>
+                    </div>
+                `;
+                
+                elements.catalog.productsContainer.appendChild(productCard);
+                
+                // Adiciona event listener
+                productCard.querySelector('.view-product').addEventListener('click', () => {
+                    showProductDetail(product);
+                });
+            });
+        }
+
+        function filterByCategory(category) {
+            // Atualiza botões de categoria
+            const categoryButtons = elements.catalog.categoriesContainer.querySelectorAll('.category-btn');
+            categoryButtons.forEach(button => {
+                button.classList.remove('active');
+                if (button.dataset.category === category || (category === 'todas' && button.dataset.category === 'todas')) {
+                    button.classList.add('active');
+                }
+            });
+            
+            // Filtra produtos
+            let filteredProducts = state.products;
+            if (category !== 'todas') {
+                filteredProducts = state.products.filter(product => product.categoria === category);
+            }
+            
+            renderProducts(filteredProducts);
+        }
+
+        function showProductDetail(product) {
+            state.currentProduct = product;
+            state.currentQuantity = 1;
+            
+            elements.productDetail.image.src = product.imagem_url;
+            elements.productDetail.name.textContent = product.nome;
+            elements.productDetail.description.textContent = product.descricao;
+            elements.productDetail.price.textContent = formatCurrency(product.preco);
+            elements.productDetail.quantity.textContent = state.currentQuantity;
+            
+            showPage('productDetail');
+        }
+
+        function createOrder() {
+            showLoading();
+            
+            // Simulando uma chamada API
+            setTimeout(() => {
+                const orderNumber = Math.floor(Math.random() * 10000);
+                const orderTotal = state.cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+                
+                elements.confirmation.orderNumber.textContent = orderNumber;
+                elements.confirmation.orderTotal.textContent = formatCurrency(orderTotal);
+                
+                // Renderiza resumo do pedido
+                elements.confirmation.orderSummary.innerHTML = '';
+                state.cart.forEach(item => {
+                    const itemElement = document.createElement('div');
+                    itemElement.className = 'mb-2';
+                    itemElement.innerHTML = `
+                        <div class="d-flex justify-content-between">
+                            <span>${item.name} x ${item.quantity}</span>
+                            <span>${formatCurrency(item.price * item.quantity)}</span>
+                        </div>
+                    `;
+                    elements.confirmation.orderSummary.appendChild(itemElement);
+                });
+                
+                // Limpa o carrinho
+                clearCart();
+                
+                showPage('confirmation');
+                hideLoading();
+            }, 1500);
+        }
+
+        // Event Listeners
+        function setupEventListeners() {
+            // Navegação
+            elements.navbar.home.addEventListener('click', (e) => {
+                e.preventDefault();
+                showPage('home');
+            });
+            
+            elements.navbar.cart.addEventListener('click', (e) => {
+                e.preventDefault();
+                showPage('cart');
+            });
+            
+            // Página Inicial
+            elements.startOrderBtn.addEventListener('click', () => {
+                showPage('catalog');
+            });
+            
+            // Página de Catálogo
+            elements.catalog.searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const filteredProducts = state.products.filter(product => 
+                    product.nome.toLowerCase().includes(searchTerm) || 
+                    product.descricao.toLowerCase().includes(searchTerm)
+                );
+                renderProducts(filteredProducts);
+            });
+            
+            // Página de Detalhes do Produto
+            elements.productDetail.decreaseBtn.addEventListener('click', () => {
+                if (state.currentQuantity > 1) {
+                    state.currentQuantity--;
+                    elements.productDetail.quantity.textContent = state.currentQuantity;
+                }
+            });
+            
+            elements.productDetail.increaseBtn.addEventListener('click', () => {
+                state.currentQuantity++;
+                elements.productDetail.quantity.textContent = state.currentQuantity;
+            });
+            
+            elements.productDetail.addToCartBtn.addEventListener('click', () => {
+                addToCart(state.currentProduct, state.currentQuantity);
+                showPage('catalog');
+            });
+            
+            elements.productDetail.backBtn.addEventListener('click', () => {
+                showPage('catalog');
+            });
+            
+            // Página do Carrinho
+            elements.cart.clearBtn.addEventListener('click', () => {
+                clearCart();
+            });
+            
+            elements.cart.checkoutBtn.addEventListener('click', () => {
+                createOrder();
+            });
+            
+            elements.cart.continueBtn.addEventListener('click', () => {
+                showPage('catalog');
+            });
+            
+            // Página de Confirmação
+            elements.confirmation.newOrderBtn.addEventListener('click', () => {
+                showPage('catalog');
+            });
+            
+            // Footer
+            elements.footer.viewCartBtn.addEventListener('click', () => {
+                showPage('cart');
+            });
+        }
+
+        // Inicialização
+        function init() {
+            showPage('home');
+            loadProducts();
+            setupEventListeners();
+        }
+
+        // Inicia a aplicação
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

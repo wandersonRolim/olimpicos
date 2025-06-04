@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Administrativo - Conveniência</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #FFD700;
+            --secondary-color: #FFC107;
+            --dark-color: #212529;
+            --light-color: #f8f9fa;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+        }
+        
+        .sidebar {
+            background-color: var(--dark-color);
+            color: white;
+            min-height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            padding-top: 20px;
+            transition: all 0.3s;
+        }
+        
+        .sidebar-header {
+            padding: 10px 20px;
+            background-color: var(--primary-color);
+            color: var(--dark-color);
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .sidebar-menu li {
+            margin-bottom: 5px;
+        }
+        
+        .sidebar-menu a {
+            display: block;
+            padding: 10px 20px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background-color: var(--primary-color);
+            color: var(--dark-color);
+        }
+        
+        .sidebar-menu i {
+            margin-right: 10px;
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        
+        .page-header {
+            background-color: white;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card {
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .card-header {
+            background-color: var(--primary-color);
+            color: var(--dark-color);
+            font-weight: bold;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: var(--dark-color);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+            color: var(--dark-color);
+        }
+        
+        .table th {
+            background-color: #f8f9fa;
+        }
+        
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+        
+        .status-pendente {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        
+        .status-em_andamento {
+            background-color: #17a2b8;
+            color: white;
+        }
+        
+        .status-concluido {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .product-image {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+                overflow: hidden;
+            }
+            
+            .sidebar-header {
+                text-align: center;
+                padding: 10px 5px;
+            }
+            
+            .sidebar-header span {
+                display: none;
+            }
+            
+            .sidebar-menu a span {
+                display: none;
+            }
+            
+            .sidebar-menu i {
+                margin-right: 0;
+                font-size: 1.2rem;
+            }
+            
+            .main-content {
+                margin-left: 70px;
+            }
+        }
+        
+        #loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+    <div id="loading" style="display: none;">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Carregando...</span>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <i class="bi bi-shop"></i> <span>Conveniência</span>
+        </div>
+        <ul class="sidebar-menu">
+            <li>
+                <a href="#" class="active" data-page="dashboard">
+                    <i class="bi bi-speedometer2"></i> <span>Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" data-page="products">
+                    <i class="bi bi-cup-straw"></i> <span>Produtos</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" data-page="orders">
+                    <i class="bi bi-cart3"></i> <span>Pedidos</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" data-page="users">
+                    <i class="bi bi-people"></i> <span>Usuários</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" data-page="settings">
+                    <i class="bi bi-gear"></i> <span>Configurações</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" id="logoutBtn">
+                    <i class="bi bi-box-arrow-right"></i> <span>Sair</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <!-- Dashboard -->
+        <div id="dashboardPage" class="page">
+            <div class="page-header d-flex justify-content-between align-items-center">
+                <h4>Dashboard</h4>
+                <div>
+                    <span class="text-muted">Hoje: </span>
+                    <span id="currentDate"></span>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Pedidos Hoje</h5>
+                            <h2 class="card-text">12</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Vendas Hoje</h5>
+                            <h2 class="card-text">R$ 345,00</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Produtos</h5>
+                            <h2 class="card-text">8</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Estoque Baixo</h5>
+                            <h2 class="card-text">2</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            Pedidos Recentes
+                        </div>
+                        <div class="card-body">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Data/Hora</th>
+                                        <th>Valor</th>
+                                        <th>Status</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>1005</td>
+                                        <td>04/06/2025 12:45</td>
+                                        <td>R$ 32,50</td>
+                                        <td><span class="status-badge status-pendente">Pendente</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary">Ver</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>1004</td>
+                                        <td>04/06/2025 12:30</td>
+                                        <td>R$ 18,00</td>
+                                        <td><span class="status-badge status-em_andamento">Em andamento</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary">Ver</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>1003</td>
+                                        <td>04/06/2025 12:15</td>
+                                        <td>R$ 25,50</td>
+                                        <td><span class="status-badge status-concluido">Concluído</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary">Ver</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>1002</td>
+                                        <td>04/06/2025 11:50</td>
+                                        <td>R$ 42,00</td>
+                                        <td><span class="status-badge status-concluido">Concluído</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary">Ver</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>1001</td>
+                                        <td>04/06/2025 11:30</td>
+                                        <td>R$ 15,00</td>
+                                        <td><span class="status-badge status-concluido">Concluído</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary">Ver</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            Produtos Mais Vendidos
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <img src="https://via.placeholder.com/50x50?text=Água" class="product-image me-3" alt="Água Mineral">
+                                <div>
+                                    <h6 class="mb-0">Água Mineral 500ml</h6>
+                                    <small class="text-muted">32 unidades</small>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center mb-3">
+                                <img src="https://via.placeholder.com/50x50?text=Cola" class="product-image me-3" alt="Refrigerante Cola">
+                                <div>
+                                    <h6 class="mb-0">Refrigerante Cola 350ml</h6>
+                                    <small class="text-muted">28 unidades</small>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center mb-3">
+                                <img src="https://via.placeholder.com/50x50?text=Cerveja" class="product-image me-3" alt="Cerveja">
+                                <div>
+                                    <h6 class="mb-0">Cerveja Pilsen 350ml</h6>
+                                    <small class="text-muted">25 unidades</small>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center mb-3">
+                                <img src="https://via.placeholder.com/50x50?text=Energético" class="product-image me-3" alt="Energético">
+                                <div>
+                                    <h6 class="mb-0">Energético 250ml</h6>
+                                    <small class="text-muted">18 unidades</small>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <img src="https://via.placeholder.com/50x50?text=Suco" class="product-image me-3" alt="Suco">
+                                <div>
+                                    <h6 class="mb-0">Suco de Laranja 300ml</h6>
+                                    <small class="text-muted">15 unidades</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Produtos -->
+        <div id="productsPage" class="page" style="display: none;">
+            <div class="page-header d-flex justify-content-between align-items-center">
+                <h4>Gerenciamento de Produtos</h4>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                    <i class="bi bi-plus-circle"></i> Novo Produto
+                </button>
+            </div>
+            
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Imagem</th>
+                                    <th>Nome</th>
+                                    <th>Categoria</th>
+                                    <th>Preço</th>
+                                    <th>Estoque</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><img src="https://via.placeholder.com/50x50?text=Água" class="product-image" alt="Água Mineral"></td>
+                                    <td>Água Mineral 500ml</td>
+                                    <td>Água</td>
+                                    <td>R$ 2,50</td>
+                                    <td>50</td>
+                                    <td><span class="badge bg-success">Disponível</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary"><i class="bi bi-pencil"></i></button>
+                                        <button class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><img src="https://via.placeholder.com/50x50?text=Cola" class="product-image" alt="Refrigerante Cola"></td>
+                                    <td>Refrigerante Cola 350ml</td>
+                                    <td>Refrigerante</td>
+                                    <td>R$ 4,50</td>
+                                    <td>40</td>
+                                    <td><span class="badge bg-success">Disponível</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary"><i class="bi bi-pencil"></i></button>
+                                        <button class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><img src="https://via.placeholder.com/50x50?text=Guaraná" class="product-image" alt="Refrigerante Guaraná"></td>
+                                    <td>Refrigerante Guaraná 350ml</td>
+                                    <td>Refrigerante</td>
+                                    <td>R$ 4,00</td>
+                                    <td>40</td>
+                                    <td><span class="badge bg-success">Disponível</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary"><i class="bi bi-pencil"></i></button>
+                                        <button class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><img src="https://via.placeholder.com/50x50?text=Suco" class="product-image" alt="Suco de Laranja"></td>
+                                    <td>Suco de Laranja 300ml</td>
+                                    <td>Suco</td>
+                                    <td>R$ 6,00</td>
+                                    <td>20</td>
+                                    <td><span class="badge bg-success">Disponível</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary"><i class="bi bi-pencil"></i></button>
+                                        <button class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><img src="https://via.placeholder.com/50x50?text=Cerveja" class="product-image" alt="Cerveja Pilsen"></td>
+                                    <td>Cerveja Pilsen 350ml</td>
+                                    <td>Alcoólica</td>
+                                    <td>R$ 5,50</td>
+                                    <td>30</td>
+                                    <td><span class="badge bg-success">Disponível</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary"><i class="bi bi-pencil"></i></button>
+                                        <button class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><img src="https://via.placeholder.com/50x50?text=Energético" class="product-image" alt="Energético"></td>
+                                    <td>Energético 250ml</td>
+                                    <td>Energético</td>
+                                    <td>R$ 8,00</td>
+                                    <td>25</td>
+                                    <td><span class="badge bg-success">Disponível</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary"><i class="bi bi-pencil"></i></button>
+                                        <button class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><img src="https://via.placeholder.com/50x50?text=Água+Coco" class="product-image" alt="Água de Coco"></td>
+                                    <td>Água de Coco 300ml</td>
+                                    <td>Água</td>
+                                    <td>R$ 7,00</td>
+                                    <td>15</td>
+                                    <td><span class="badge bg-success">Disponível</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary"><i class="bi bi-pencil"></i></button>
+                                        <button class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><img src="https://via.placeholder.com/50x50?text=Chá" class="product-image" alt="Chá Gelado"></td>
+                                    <td>Chá Gelado 350ml</td>
+                                    <td>Chá</td>
+                                    <td>R$ 5,00</td>
+                                    <td>20</td>
+                                    <td><span class="badge bg-success">Disponível</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary"><i class="bi bi-pencil"></i></button>
+                                        <button class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pedidos -->
+        <div id="ordersPage" class="page" style="display: none;">
+            <div class="page-header">
+                <h4>Gerenciamento de Pedidos</h4>
+            </div>
+            
+            <div class="card">
+                <div class="card-body">
+                    <ul class="nav nav-tabs mb-3" id="ordersTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab">Pendentes</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="processing-tab" data-bs-toggle="tab" data-bs-target="#processing" type="button" role="tab">Em Andamento</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed" type="button" role="tab">Concluídos</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="ordersTabContent">
+                        <div class="tab-pane fade show active" id="pending" role="tabpanel">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Data/Hora</th>
+                                            <th>Itens</th>
+                                            <th>Valor Total</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1005</td>
+                                            <td>04/06/2025 12:45</td>
+                                            <td>3 itens</td>
+                                            <td>R$ 32,50</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#orderDetailModal">Ver Detalhes</button>
+                                                <button class="btn btn-sm btn-success">Iniciar Preparo</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="processing" role="tabpanel">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Data/Hora</th>
+                                            <th>Itens</th>
+                                            <th>Valor Total</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1004</td>
+                                            <td>04/06/2025 12:30</td>
+                                            <td>2 itens</td>
+                                            <td>R$ 18,00</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#orderDetailModal">Ver Detalhes</button>
+                                                <button class="btn btn-sm btn-success">Concluir</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="completed" role="tabpanel">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Data/Hora</th>
+                                            <th>Itens</th>
+                                            <th>Valor Total</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1003</td>
+                                            <td>04/06/2025 12:15</td>
+                                            <td>3 itens</td>
+                                            <td>R$ 25,50</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#orderDetailModal">Ver Detalhes</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>1002</td>
+                                            <td>04/06/2025 11:50</td>
+                                            <td>4 itens</td>
+                                            <td>R$ 42,00</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#orderDetailModal">Ver Detalhes</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>1001</td>
+                                            <td>04/06/2025 11:30</td>
+                                            <td>2 itens</td>
+                                            <td>R$ 15,00</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#orderDetailModal">Ver Detalhes</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Usuários -->
+        <div id="usersPage" class="page" style="display: none;">
+            <div class="page-header d-flex justify-content-between align-items-center">
+                <h4>Gerenciamento de Usuários</h4>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                    <i class="bi bi-plus-circle"></i> Novo Usuário
+                </button>
+            </div>
+            
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Nome</th>
+                                    <th>Email</th>
+                                    <th>Tipo</th>
+                                    <th>Data de Cadastro</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td>Administrador</td>
+                                    <td>admin@conveniencia.com</td>
+                                    <td><span class="badge bg-danger">Admin</span></td>
+                                    <td>01/06/2025</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary"><i class="bi bi-pencil"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td>João Silva</td>
+                                    <td>joao@conveniencia.com</td>
+                                    <td><span class="badge bg-secondary">Funcionário</span></td>
+                                    <td>02/06/2025</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary"><i class="bi bi-pencil"></i></button>
+                                        <button class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>3</td>
+                                    <td>Maria Oliveira</td>
+                                    <td>maria@conveniencia.com</td>
+                                    <td><span class="badge bg-secondary">Funcionário</span></td>
+                                    <td>03/06/2025</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary"><i class="bi bi-pencil"></i></button>
+                                        <button class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Configurações -->
+        <div id="settingsPage" class="page" style="display: none;">
+            <div class="page-header">
+                <h4>Configurações</h4>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    Configurações Gerais
+                </div>
+                <div class="card-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="storeName" class="form-label">Nome da Loja</label>
+                            <input type="text" class="form-control" id="storeName" value="Conveniência">
+                        </div>
+                        <div class="mb-3">
+                            <label for="storeAddress" class="form-label">Endereço</label>
+                            <input type="text" class="form-control" id="storeAddress" value="Rua Exemplo, 123">
+                        </div>
+                        <div class="mb-3">
+                            <label for="storePhone" class="form-label">Telefone</label>
+                            <input type="text" class="form-control" id="storePhone" value="(11) 99999-9999">
+                        </div>
+                        <div class="mb-3">
+                            <label for="storeEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="storeEmail" value="contato@conveniencia.com">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card mt-4">
+                <div class="card-header">
+                    Aparência do Sistema
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Cor Principal</label>
+                        <div class="d-flex">
+                            <div class="form-check me-3">
+                                <input class="form-check-input" type="radio" name="primaryColor" id="colorYellow" checked>
+                                <label class="form-check-label" for="colorYellow">
+                                    Amarelo
+                                </label>
+                            </div>
+                            <div class="form-check me-3">
+                                <input class="form-check-input" type="radio" name="primaryColor" id="colorBlue">
+                                <label class="form-check-label" for="colorBlue">
+                                    Azul
+                                </label>
+                            </div>
+                            <div class="form-check me-3">
+                                <input class="form-check-input" type="radio" name="primaryColor" id="colorGreen">
+                                <label class="form-check-label" for="colorGreen">
+                                    Verde
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="primaryColor" id="colorRed">
+                                <label class="form-check-label" for="colorRed">
+                                    Vermelho
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-primary">Aplicar Tema</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Detalhes do Pedido -->
+    <div class="modal fade" id="orderDetailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Detalhes do Pedido #1005</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p><strong>Data/Hora:</strong> 04/06/2025 12:45</p>
+                            <p><strong>Status:</strong> <span class="status-badge status-pendente">Pendente</span></p>
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            <p><strong>Valor Total:</strong> R$ 32,50</p>
+                        </div>
+                    </div>
+                    
+                    <h6>Itens do Pedido</h6>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Produto</th>
+                                    <th>Quantidade</th>
+                                    <th>Preço Unit.</th>
+                                    <th>Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Refrigerante Cola 350ml</td>
+                                    <td>2</td>
+                                    <td>R$ 4,50</td>
+                                    <td>R$ 9,00</td>
+                                </tr>
+                                <tr>
+                                    <td>Cerveja Pilsen 350ml</td>
+                                    <td>3</td>
+                                    <td>R$ 5,50</td>
+                                    <td>R$ 16,50</td>
+                                </tr>
+                                <tr>
+                                    <td>Água Mineral 500ml</td>
+                                    <td>1</td>
+                                    <td>R$ 2,50</td>
+                                    <td>R$ 2,50</td>
+                                </tr>
+                                <tr>
+                                    <td>Energético 250ml</td>
+                                    <td>1</td>
+                                    <td>R$ 8,00</td>
+                                    <td>R$ 8,00</td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th colspan="3" class="text-end">Total:</th>
+                                    <th>R$ 36,00</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <h6>Observações</h6>
+                        <p>Nenhuma observação.</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-success">Iniciar Preparo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Adicionar Produto -->
+    <div class="modal fade" id="addProductModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Adicionar Novo Produto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="productName" class="form-label">Nome do Produto</label>
+                            <input type="text" class="form-control" id="productName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="productDescription" class="form-label">Descrição</label>
+                            <textarea class="form-control" id="productDescription" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="productCategory" class="form-label">Categoria</label>
+                            <select class="form-select" id="productCategory" required>
+                                <option value="">Selecione uma categoria</option>
+                                <option value="Água">Água</option>
+                                <option value="Refrigerante">Refrigerante</option>
+                                <option value="Suco">Suco</option>
+                                <option value="Alcoólica">Alcoólica</option>
+                                <option value="Energético">Energético</option>
+                                <option value="Chá">Chá</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="productPrice" class="form-label">Preço (R$)</label>
+                            <input type="number" class="form-control" id="productPrice" step="0.01" min="0" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="productStock" class="form-label">Estoque</label>
+                            <input type="number" class="form-control" id="productStock" min="0" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="productImage" class="form-label">Imagem</label>
+                            <input type="file" class="form-control" id="productImage">
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="productAvailable" checked>
+                            <label class="form-check-label" for="productAvailable">
+                                Disponível para venda
+                            </label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Adicionar Usuário -->
+    <div class="modal fade" id="addUserModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Adicionar Novo Usuário</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="userName" class="form-label">Nome</label>
+                            <input type="text" class="form-control" id="userName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="userEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="userEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="userPassword" class="form-label">Senha</label>
+                            <input type="password" class="form-control" id="userPassword" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="userType" class="form-label">Tipo</label>
+                            <select class="form-select" id="userType" required>
+                                <option value="funcionario">Funcionário</option>
+                                <option value="admin">Administrador</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Exibir data atual
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('pt-BR', options);
+            
+            // Navegação entre páginas
+            const menuLinks = document.querySelectorAll('.sidebar-menu a');
+            const pages = document.querySelectorAll('.page');
+            
+            menuLinks.forEach(link => {
+                if (link.id !== 'logoutBtn') {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        
+                        // Remove classe ativa de todos os links
+                        menuLinks.forEach(item => item.classList.remove('active'));
+                        
+                        // Adiciona classe ativa ao link clicado
+                        this.classList.add('active');
+                        
+                        // Esconde todas as páginas
+                        pages.forEach(page => page.style.display = 'none');
+                        
+                        // Mostra a página correspondente
+                        const pageId = this.getAttribute('data-page') + 'Page';
+                        document.getElementById(pageId).style.display = 'block';
+                    });
+                }
+            });
+            
+            // Logout
+            document.getElementById('logoutBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                alert('Logout realizado com sucesso!');
+                // Em produção, redirecionar para a página de login
+            });
+        });
+    </script>
+</body>
+</html>
